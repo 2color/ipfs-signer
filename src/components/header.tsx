@@ -3,13 +3,24 @@ import React, { useCallback, useState } from 'react'
 import { usePathname } from 'next/navigation'
 import Link from 'next/link'
 import { useWeb3Modal } from '@web3modal/wagmi/react'
+import { useAccount } from 'wagmi'
+import { AddressIcon } from './addressicon'
+import Spinner from './spinner'
 
 export default function Header() {
-  const { open } = useWeb3Modal()
+  const { open, close } = useWeb3Modal()
+
+  const { address, isConnecting, isDisconnected } = useAccount()
+
+  console.log({ address, isConnecting, isDisconnected })
 
   const handleConnectWallet = useCallback(() => {
-    open()
-  }, [])
+    open({ view: 'Account' })
+  }, [open])
+
+  // const handleCloseWallet = useCallback(() => {
+  //   close()
+  // }, [close])
 
   return (
     <header className="bg-indigo-500 text-white p-4">
@@ -22,7 +33,9 @@ export default function Header() {
             height={35}
             width={35}
           />
-          <h1 className="text-xl font-semibold">Off-chain signing with IPFS</h1>
+          <h1 className="hidden md:block text-xl font-semibold">
+            Off-chain signing with IPFS
+          </h1>
         </div>
         <nav>
           <ul className="flex space-x-4">
@@ -31,21 +44,12 @@ export default function Header() {
                 href="/"
                 className="block px-4 py-2 hover:bg-indigo-600  border-b-4 border-white"
               >
-                Home
+                Sign
               </Link>
             </li>
             <li>
               <Link
-                href="/sign"
-                // activeClassName="border-b-4 border-white"
-                className="block px-4 py-2 hover:bg-indigo-600 rounded-md"
-              >
-                Sign messages
-              </Link>
-            </li>
-            <li>
-              <Link
-                href="/contact"
+                href="/verify"
                 // activeClassName="border-b-4 border-white"
                 className="block px-4 py-2 hover:bg-indigo-600 rounded-md"
               >
@@ -54,12 +58,18 @@ export default function Header() {
             </li>
           </ul>
         </nav>
-        <button
-          onClick={handleConnectWallet}
-          className="bg-white text-indigo-500 px-6 py-2 rounded-md hover:bg-indigo-200 focus:outline-none focus:ring-2 focus:ring-white focus:ring-opacity-50"
-        >
-          Connect Wallet
-        </button>
+        {/* {address && <AddressIcon address={address} />} */}
+        <w3m-button />
+
+        {/* {isDisconnected && (
+          <button
+            onClick={handleConnectWallet}
+            className="bg-white text-indigo-500 px-6 py-2 rounded-md hover:bg-indigo-200 focus:outline-none focus:ring-2 focus:ring-white focus:ring-opacity-50"
+          >
+            Connect Wallet
+          </button>
+        )} */}
+        {isConnecting && <Spinner />}
       </div>
     </header>
     // <header className="bg-indigo-500 text-white p-4">

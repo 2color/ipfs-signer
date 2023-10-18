@@ -9,8 +9,8 @@ const projectId = '4664e914f77775ec3f4acdcb251c483e'
 
 // 2. Create wagmiConfig
 const metadata = {
-  name: 'Web3Modal',
-  description: 'Web3Modal Example',
+  name: 'IPFS-signer',
+  description: 'Use IPFS to publish off-chain signatures',
   url: 'https://web3modal.com',
   icons: ['https://avatars.githubusercontent.com/u/37784886'],
 }
