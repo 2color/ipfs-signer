@@ -6,8 +6,8 @@ function TextareaWithButton() {
   const [cid, setCid] = useState('')
 
   const handleVerify = () => {
-    // Handle the signing logic here
-    console.log('Signing:', text)
+    // Handle the verification logic here
+    console.log('Verifying...:')
   }
 
   return (
