@@ -4,7 +4,7 @@ import { trustlessGateway } from 'helia/block-brokers'
 import { CID } from 'multiformats/cid'
 import { car } from '@helia/car'
 import { CarWriter, CarReader } from '@ipld/car'
-import toIterable from 'stream-to-it'
+import toIt from 'browser-readablestream-to-it'
 
 export async function startHttpHelia() {
   const helia = await createHelia({
@@ -59,7 +59,7 @@ export async function getSignedMessageFromCar(
 ): Promise<SignedMessagePayload> {
   const stream = await file.stream()
 
-  const reader = await CarReader.fromIterable(toIterable(stream))
+  const reader = await CarReader.fromIterable(toIt(stream))
   const roots = await reader.getRoots()
   await car(helia).import(reader)
 
