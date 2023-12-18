@@ -1,80 +1,106 @@
 import Header from '@/components/header'
-import React, {
-  MouseEventHandler,
-  useCallback,
-  useEffect,
-  useState,
-} from 'react'
+import { useHeliaContext } from '@/context/helia'
+import { createCarBlob, createCidForSignedMessage, downloadCarFile } from '@/utils/ipfs'
+import { CID } from 'multiformats/cid'
+import React, { MouseEventHandler, useCallback, useEffect, useState } from 'react'
 import { useAccount, useSignMessage } from 'wagmi'
 
-function TextareaWithButton() {
-  const [signedMessage, setSignedMessage] = useState('')
+export default function SignPage() {
+  const [signature, setSignature] = useState('')
   const [message, setMessage] = useState('')
-  const { address, isConnecting, isDisconnected } = useAccount()
-
-  const { data, isError, isLoading, isSuccess, signMessageAsync } =
-    useSignMessage()
+  const [cid, setCid] = useState<CID>()
+  const [error, setError] = useState('')
+  const { address } = useAccount()
+  const { fs, helia } = useHeliaContext()
+  const { data, isError, isLoading, isSuccess, signMessageAsync } = useSignMessage()
 
   const handleSign = useCallback(async () => {
+    if (!address) {
+      setError('Connect wallet first')
+      return
+    }
+    if (!fs) {
+      setError('UnixFS is not instantiated')
+      return
+    }
+
+    setError('')
+
     // Handle the signing logic here
     try {
-      const signedMessage = await signMessageAsync({ message })
-      setSignedMessage(signedMessage)
+      const signature = await signMessageAsync({ message })
+      setSignature(signature)
+      const cid = await createCidForSignedMessage(fs, { message, signature, address })
+      setCid(cid)
     } catch (e) {
       console.log(e)
+      setError(e as string)
     }
-  }, [signMessageAsync, message])
+  }, [address, fs, signMessageAsync, message])
 
-  useEffect(() => {
-    if (signedMessage.length > 0) {
+  const handleDownloadCar = useCallback(async () => {
+    if (!helia) {
+      setError('UnixFS not initialised')
+      return
     }
-  }, [signedMessage])
+    if (!cid) {
+      setError('no cid')
+      return
+    }
+    const blob = await createCarBlob(helia, cid)
+    downloadCarFile(blob)
+  }, [helia, cid])
 
-  const hasSigned = signedMessage.length > 0
+  const hasSigned = signature.length > 0
 
   return (
     <div className="mt-10 flex items-center justify-center">
       <div className="p-6 bg-white rounded-md shadow-md">
-        <h2 className="mb-4 text-xl font-bold text-gray-700">
-          Message to sign
-        </h2>
-        {!hasSigned && (
-          <SigningForm
-            handleSign={handleSign}
+        <h2 className="mb-4 text-xl font-bold text-gray-700">Message to sign</h2>
+        {error && <p className="p-2 bg-red-400 rounded-sm text-white">Error: {error}</p>}
+        {!hasSigned && <SigningForm handleSign={handleSign} message={message} setMessage={setMessage} />}
+        {hasSigned && cid && (
+          <DownloadCar
             message={message}
-            setMessage={setMessage}
+            address={address}
+            signature={signature}
+            cid={cid}
+            handleDownloadCar={handleDownloadCar}
           />
         )}
-        {hasSigned && (
-          <CreateCIDForm message={message} signature={signedMessage} />
-        )}
+        {/* {hasSigned && cid && (
+        )} */}
       </div>
     </div>
   )
 }
 
-export default TextareaWithButton
-
-function CreateCIDForm({
+function DownloadCar({
   message,
   signature,
+  address,
+  cid,
+  handleDownloadCar,
 }: {
   message: string
   signature: string
+  address: `0x${string}` | undefined
+  cid: CID
+  handleDownloadCar: () => Promise<void>
 }) {
   return (
     <>
-      <textarea
-        value={message}
-        disabled={true}
-        className="w-full h-32 p-3 border rounded-md resize-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
-      ></textarea>
-      <h2 className="mb-2 text-l font-bold text-gray-700">Signature</h2>
-      <pre className="prose max-w-md whitespace-pre-wrap break-all">
-        {signature}
+      <h2 className="mb-2 text-l font-bold text-gray-700">Signed message</h2>
+      <pre className="mb-2 prose max-w-md whitespace-pre-wrap break-all">
+        {JSON.stringify({ message, signature, address })}
       </pre>
-      <button className="mt-4 px-6 py-2 bg-indigo-500 text-white rounded-md hover:bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:ring-opacity-50">
-        createCID
+      <h2 className="mb-2 text-l font-bold text-gray-700">CID:</h2>
+      <pre className="mb-2 prose max-w-md whitespace-pre-wrap break-all">{cid.toV1().toString()}</pre>
+      <button
+        onClick={handleDownloadCar}
+        className="mt-4 px-6 py-2 bg-indigo-500 text-white rounded-md hover:bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:ring-opacity-50"
+      >
+        Download CAR
       </button>
     </>
   )
@@ -84,10 +110,12 @@ function SigningForm({
   handleSign,
   message,
   setMessage,
+  address,
 }: {
   handleSign: () => Promise<void>
   message: string
   setMessage: React.Dispatch<React.SetStateAction<string>>
+  address?: string
 }) {
   return (
     <>
@@ -106,5 +134,3 @@ function SigningForm({
     </>
   )
 }
-
-// type HandleSignType = () => Promise<void>
