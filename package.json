@@ -11,14 +11,17 @@
   "dependencies": {
     "@helia/car": "^1.0.4",
     "@helia/unixfs": "^1.4.3",
+    "@heroicons/react": "^2.0.18",
     "@ipld/car": "^5.2.4",
     "@web3modal/wagmi": "^3.1.0",
     "blo": "^1.1.1",
     "helia": "^2.1.0",
     "multiformats": "^12.1.3",
     "next": "13.5.4",
+    "prismjs": "^1.29.0",
     "react": "^18",
     "react-dom": "^18",
+    "stream-to-it": "^0.2.4",
     "viem": "^1.16.4",
     "wagmi": "^1.4.3"
   },

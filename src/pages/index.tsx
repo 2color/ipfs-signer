@@ -1,4 +1,5 @@
 import Header from '@/components/header'
+import { SignedMessage } from '@/components/signed-message'
 import { useHeliaContext } from '@/context/helia'
 import { createCarBlob, createCidForSignedMessage, downloadCarFile } from '@/utils/ipfs'
 import { CID } from 'multiformats/cid'
@@ -6,7 +7,7 @@ import React, { MouseEventHandler, useCallback, useEffect, useState } from 'reac
 import { useAccount, useSignMessage } from 'wagmi'
 
 export default function SignPage() {
-  const [signature, setSignature] = useState('')
+  const [signature, setSignature] = useState<`0x${string}` | undefined>()
   const [message, setMessage] = useState('')
   const [cid, setCid] = useState<CID>()
   const [error, setError] = useState('')
@@ -51,15 +52,15 @@ export default function SignPage() {
     downloadCarFile(blob)
   }, [helia, cid])
 
-  const hasSigned = signature.length > 0
+  const hasSigned = signature && signature.length > 0
 
   return (
     <div className="mt-10 flex items-center justify-center">
-      <div className="p-6 bg-white rounded-md shadow-md">
+      <div className="p-6 bg-white rounded-md shadow-md md:w-1/2 w-full">
         <h2 className="mb-4 text-xl font-bold text-gray-700">Message to sign</h2>
         {error && <p className="p-2 bg-red-400 rounded-sm text-white">Error: {error}</p>}
         {!hasSigned && <SigningForm handleSign={handleSign} message={message} setMessage={setMessage} />}
-        {hasSigned && cid && (
+        {hasSigned && address && cid && (
           <DownloadCar
             message={message}
             address={address}
@@ -83,26 +84,26 @@ function DownloadCar({
   handleDownloadCar,
 }: {
   message: string
-  signature: string
-  address: `0x${string}` | undefined
+  signature: `0x${string}`
+  address: `0x${string}`
   cid: CID
   handleDownloadCar: () => Promise<void>
 }) {
   return (
-    <>
-      <h2 className="mb-2 text-l font-bold text-gray-700">Signed message</h2>
-      <pre className="mb-2 prose max-w-md whitespace-pre-wrap break-all">
-        {JSON.stringify({ message, signature, address })}
-      </pre>
-      <h2 className="mb-2 text-l font-bold text-gray-700">CID:</h2>
-      <pre className="mb-2 prose max-w-md whitespace-pre-wrap break-all">{cid.toV1().toString()}</pre>
+    <div>
+      <SignedMessage message={message} signature={signature} address={address} />
+      <div>
+        <span className="font-bold">CID: </span>
+        <span className="whitespace-nowrap">{cid.toV1().toString()}</span>
+      </div>
+
       <button
         onClick={handleDownloadCar}
-        className="mt-4 px-6 py-2 bg-indigo-500 text-white rounded-md hover:bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:ring-opacity-50"
+        className="mt-4 px-6 py-2 max-w-sm bg-indigo-500 text-white rounded-md hover:bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:ring-opacity-50"
       >
         Download CAR
       </button>
-    </>
+    </div>
   )
 }
 

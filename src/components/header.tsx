@@ -7,14 +7,17 @@ import { useAccount } from 'wagmi'
 import { AddressIcon } from './addressicon'
 import Spinner from './spinner'
 
+const NavPaths = [
+  ['/', 'Sign'],
+  ['/fetch', 'Fetch & Verify'],
+  ['/verify', 'Local Verify (CAR)'],
+]
+
 export default function Header() {
   const { open, close } = useWeb3Modal()
   const currentPath = usePathname()
-  console.log(currentPath)
 
   const { address, isConnecting, isDisconnected } = useAccount()
-
-  // console.log({ address, isConnecting, isDisconnected })
 
   const handleConnectWallet = useCallback(() => {
     open({ view: 'Account' })
@@ -39,27 +42,18 @@ export default function Header() {
         </div>
         <nav>
           <ul className="flex space-x-4">
-            <li>
-              <Link
-                href="/"
-                className={`block px-4 py-2 hover:bg-indigo-600   ${
-                  currentPath === '/' ? `border-b-4 border-white` : ''
-                }`}
-              >
-                Sign
-              </Link>
-            </li>
-            <li>
-              <Link
-                href="/fetch"
-                // activeClassName="border-b-4 border-white"
-                className={`block px-4 py-2 hover:bg-indigo-600 ${
-                  currentPath === '/fetch' ? `border-b-4 border-white ` : ''
-                }`}
-              >
-                Fetch
-              </Link>
-            </li>
+            {NavPaths.map(([path, anchor]) => (
+              <li key={path}>
+                <Link
+                  href={path}
+                  className={`block px-4 py-2 hover:bg-indigo-600   ${
+                    currentPath === path ? `border-b-4 border-white` : ''
+                  }`}
+                >
+                  {anchor}
+                </Link>
+              </li>
+            ))}
           </ul>
         </nav>
         {/* {address && <AddressIcon address={address} />} */}
