@@ -58,6 +58,7 @@ export default function FetchVerify() {
         </button>
         {message && (
           <SignedMessage
+            cid={cid}
             address={message.address}
             signature={message.signature}
             message={message.message}
