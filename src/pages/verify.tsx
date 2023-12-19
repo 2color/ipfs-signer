@@ -1,5 +1,5 @@
 import { useHeliaContext } from '@/context/helia'
-import { getSignedMessage, getSignedMessageFromCar, SignedMessagePayload } from '@/utils/ipfs'
+import { getSignedMessage, getSignedMessageFromCar, SignedMessageCID } from '@/utils/ipfs'
 import React, { ChangeEvent, useCallback, useState } from 'react'
 import { verifyMessage } from 'viem'
 import { SignedMessage } from '@/components/signed-message'
@@ -7,7 +7,8 @@ import { SignedMessage } from '@/components/signed-message'
 export default function Verify() {
   const [error, setError] = useState('')
   const [selectedFile, setSelectedFile] = useState<File | undefined>()
-  const [message, setMessage] = useState<SignedMessagePayload | undefined>()
+  const [message, setMessage] = useState<SignedMessageCID | undefined>()
+
   const [isMessageVerified, setIsMessageVerified] = useState<boolean | undefined>()
 
   const { helia, fs } = useHeliaContext()
@@ -20,7 +21,6 @@ export default function Verify() {
 
       if (helia && fs && file) {
         const message = await getSignedMessageFromCar(helia, fs, file)
-
         // Verify the signature
         const verified = await verifyMessage({
           address: message.address,
@@ -55,6 +55,7 @@ export default function Verify() {
 
         {message && (
           <SignedMessage
+            cid={message.cid.toV1().toString()}
             address={message.address}
             signature={message.signature}
             message={message.message}

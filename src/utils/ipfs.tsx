@@ -27,12 +27,11 @@ export async function startHttpHelia() {
   return helia
 }
 
-export async function getUnixFsJson(fs: UnixFS, cid: string): Promise<any> {
+export async function getUnixFsJson(fs: UnixFS, cid: CID): Promise<any> {
   const decoder = new TextDecoder()
-  const parsedCid = CID.parse(cid)
 
   let unparsedJson = ''
-  for await (const chunk of fs.cat(parsedCid)) {
+  for await (const chunk of fs.cat(cid)) {
     unparsedJson += decoder.decode(chunk, {
       stream: true,
     })
@@ -42,7 +41,11 @@ export async function getUnixFsJson(fs: UnixFS, cid: string): Promise<any> {
   return parsedJSON
 }
 
-export async function getSignedMessage(fs: UnixFS, cid: string): Promise<SignedMessagePayload> {
+export async function getSignedMessage(fs: UnixFS, cid: CID | string): Promise<SignedMessagePayload> {
+  if (typeof cid === 'string') {
+    cid = CID.parse(cid)
+  }
+
   const json = await getUnixFsJson(fs, cid)
 
   if (json?.message && json?.signature && json?.address) {
@@ -56,7 +59,7 @@ export async function getSignedMessageFromCar(
   helia: Helia,
   fs: UnixFS,
   file: File,
-): Promise<SignedMessagePayload> {
+): Promise<SignedMessageCID> {
   const stream = await file.stream()
 
   const reader = await CarReader.fromIterable(toIt(stream))
@@ -67,9 +70,13 @@ export async function getSignedMessageFromCar(
     throw new Error('Only supports 1 root CID')
   }
 
-  const rootCid = roots[0].toString()
+  const rootCid = roots[0]
 
-  return await getSignedMessage(fs, rootCid)
+  const signedMessage = await getSignedMessage(fs, rootCid)
+  return {
+    ...signedMessage,
+    cid: rootCid,
+  }
 
   // throw new Error('CID is missing the message, signature and address fields')
 }
@@ -79,6 +86,8 @@ export interface SignedMessagePayload {
   signature: `0x${string}`
   address: `0x${string}`
 }
+
+export type SignedMessageCID = SignedMessagePayload & { cid: CID }
 
 export async function createCidForSignedMessage(
   fs: UnixFS,
