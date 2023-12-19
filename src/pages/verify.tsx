@@ -6,7 +6,6 @@ import { SignedMessage } from '@/components/signed-message'
 
 export default function Verify() {
   const [error, setError] = useState('')
-  const [cid, setCid] = useState('bafkreiga2b4guve3zijoxrcodstllif5u5t4dniujga7ak2yxjxqm5tnwa')
   const [selectedFile, setSelectedFile] = useState<File | undefined>()
   const [message, setMessage] = useState<SignedMessagePayload | undefined>()
   const [isMessageVerified, setIsMessageVerified] = useState<boolean | undefined>()
@@ -28,7 +27,7 @@ export default function Verify() {
           message: message.message,
           signature: message.signature,
         })
-        console.log('woot', verified)
+        console.log('verified', verified)
         setIsMessageVerified(verified)
         setMessage(message)
       }

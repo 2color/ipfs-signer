@@ -54,10 +54,21 @@ export default function SignPage() {
 
   const hasSigned = signature && signature.length > 0
 
+  if (!address) {
+    return (
+      <div className="mt-10 flex items-center justify-center">
+        <div className="p-6 bg-white rounded-md shadow-md md:w-1/2 w-full">
+          <h2 className="mb-4 text-xl font-bold text-gray-700">To sign a message, connect your wallet</h2>
+          <w3m-connect-button />
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="mt-10 flex items-center justify-center">
       <div className="p-6 bg-white rounded-md shadow-md md:w-1/2 w-full">
-        <h2 className="mb-4 text-xl font-bold text-gray-700">Message to sign</h2>
+        <h2 className="mb-4 text-xl font-bold text-gray-700">Sign a message with your Ethereum wallet</h2>
         {error && <p className="p-2 bg-red-400 rounded-sm text-white">Error: {error}</p>}
         {!hasSigned && <SigningForm handleSign={handleSign} message={message} setMessage={setMessage} />}
         {hasSigned && address && cid && (
@@ -69,8 +80,6 @@ export default function SignPage() {
             handleDownloadCar={handleDownloadCar}
           />
         )}
-        {/* {hasSigned && cid && (
-        )} */}
       </div>
     </div>
   )
@@ -91,11 +100,7 @@ function DownloadCar({
 }) {
   return (
     <div>
-      <SignedMessage message={message} signature={signature} address={address} />
-      <div>
-        <span className="font-bold">CID: </span>
-        <span className="whitespace-nowrap">{cid.toV1().toString()}</span>
-      </div>
+      <SignedMessage message={message} signature={signature} address={address} cid={cid.toV1().toString()} />
 
       <button
         onClick={handleDownloadCar}

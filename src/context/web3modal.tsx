@@ -21,6 +21,6 @@ const wagmiConfig = defaultWagmiConfig({ chains, projectId, metadata })
 // 3. Create modal
 createWeb3Modal({ wagmiConfig, projectId, chains })
 
-export default function WagmiProvider({ children }: { children: ReactNode }) {
+export default function Web3Modal({ children }: { children: ReactNode }) {
   return <WagmiConfig config={wagmiConfig}>{children}</WagmiConfig>
 }
