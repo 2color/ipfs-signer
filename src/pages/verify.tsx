@@ -1,5 +1,5 @@
 import { useHeliaContext } from '@/context/helia'
-import { getSignedMessage, getSignedMessageFromCar, SignedMessageCID } from '@/utils/ipfs'
+import { getSignedMessageFromCar, SignedMessageCID } from '@/utils/ipfs'
 import React, { ChangeEvent, useCallback, useState } from 'react'
 import { verifyMessage } from 'viem'
 import { SignedMessage } from '@/components/signed-message'
