@@ -11,15 +11,15 @@ export default function FetchVerify() {
   const [message, setMessage] = useState<SignedMessagePayload | undefined>()
   const [isMessageVerified, setIsMessageVerified] = useState<boolean | undefined>()
 
-  const { helia, fs } = useHeliaContext()
+  const { helia } = useHeliaContext()
 
   const handleFetchCid = useCallback(async () => {
-    if (!fs) {
+    if (!helia) {
       setError('UnixFS not initialised')
       return
     }
     try {
-      const message = await getSignedMessage(fs, cid)
+      const message = await getSignedMessage(helia, cid)
       setMessage(message)
 
       // Verify the signature
@@ -32,7 +32,7 @@ export default function FetchVerify() {
     } catch (e: any) {
       setError(e)
     }
-  }, [cid, fs])
+  }, [cid, helia])
 
   return (
     <div className="mt-10 flex items-center justify-center">

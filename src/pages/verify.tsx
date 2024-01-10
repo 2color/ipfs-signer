@@ -11,7 +11,7 @@ export default function Verify() {
 
   const [isMessageVerified, setIsMessageVerified] = useState<boolean | undefined>()
 
-  const { helia, fs } = useHeliaContext()
+  const { helia } = useHeliaContext()
 
   const handleFileChange = useCallback(
     async (event: ChangeEvent<HTMLInputElement>) => {
@@ -19,8 +19,8 @@ export default function Verify() {
       // Access the selected file from the event
       const file = event.target.files?.[0]
 
-      if (helia && fs && file) {
-        const message = await getSignedMessageFromCar(helia, fs, file)
+      if (helia && file) {
+        const message = await getSignedMessageFromCar(helia, file)
         // Verify the signature
         const verified = await verifyMessage({
           address: message.address,
@@ -33,7 +33,7 @@ export default function Verify() {
       }
       setSelectedFile(file)
     },
-    [fs, helia],
+    [helia],
   )
 
   return (

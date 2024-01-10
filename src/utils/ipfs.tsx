@@ -1,4 +1,5 @@
 import { UnixFS } from '@helia/unixfs'
+import { dagJson } from '@helia/dag-json'
 import { createHelia, Helia } from 'helia'
 import { trustlessGateway } from 'helia/block-brokers'
 import { CID } from 'multiformats/cid'
@@ -41,12 +42,20 @@ export async function getUnixFsJson(fs: UnixFS, cid: CID): Promise<any> {
   return parsedJSON
 }
 
-export async function getSignedMessage(fs: UnixFS, cid: CID | string): Promise<SignedMessagePayload> {
+export async function getJson(helia: Helia, cid: CID): Promise<any> {
+  const j = dagJson(helia)
+
+  const json = await j.get(cid)
+
+  return json
+}
+
+export async function getSignedMessage(helia: Helia, cid: CID | string): Promise<SignedMessagePayload> {
   if (typeof cid === 'string') {
     cid = CID.parse(cid)
   }
 
-  const json = await getUnixFsJson(fs, cid)
+  const json = await getJson(helia, cid)
 
   if (json?.message && json?.signature && json?.address) {
     return json as SignedMessagePayload
@@ -55,11 +64,7 @@ export async function getSignedMessage(fs: UnixFS, cid: CID | string): Promise<S
   throw new Error('CID is missing the message, signature and address fields')
 }
 
-export async function getSignedMessageFromCar(
-  helia: Helia,
-  fs: UnixFS,
-  file: File,
-): Promise<SignedMessageCID> {
+export async function getSignedMessageFromCar(helia: Helia, file: File): Promise<SignedMessageCID> {
   const stream = await file.stream()
 
   const reader = await CarReader.fromIterable(toIt(stream))
@@ -72,7 +77,7 @@ export async function getSignedMessageFromCar(
 
   const rootCid = roots[0]
 
-  const signedMessage = await getSignedMessage(fs, rootCid)
+  const signedMessage = await getSignedMessage(helia, rootCid)
   return {
     ...signedMessage,
     cid: rootCid,
@@ -90,19 +95,17 @@ export interface SignedMessagePayload {
 export type SignedMessageCID = SignedMessagePayload & { cid: CID }
 
 export async function createCidForSignedMessage(
-  fs: UnixFS,
+  helia: Helia,
   { message, signature, address }: SignedMessagePayload,
 ) {
-  const encoder = new TextEncoder()
-  const cidContent = encoder.encode(
-    JSON.stringify({
-      address,
-      message,
-      signature,
-    }),
-  )
+  const j = dagJson(helia)
 
-  const cid = await fs.addBytes(cidContent)
+  const cid = await j.add({
+    address,
+    message,
+    signature,
+  })
+
   return cid
 }
 
