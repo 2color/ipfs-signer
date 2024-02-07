@@ -7,7 +7,6 @@ import { UnixFS, unixfs } from '@helia/unixfs'
 // 👇 The context type will be avilable "anywhere" in the app
 interface HeliaContextInterface {
   helia?: Helia
-  fs?: UnixFS
 }
 export const heliaContext = createContext<HeliaContextInterface>({})
 
@@ -17,7 +16,6 @@ interface WrapperProps {
 
 export function HeliaProvider({ children }: WrapperProps) {
   const [helia, setHelia] = useState<Helia>()
-  const [fs, setFs] = useState<UnixFS>()
 
   useEffect(() => {
     const init = async () => {
@@ -25,10 +23,8 @@ export function HeliaProvider({ children }: WrapperProps) {
 
       try {
         const helia = await startHttpHelia()
-        const fs = unixfs(helia)
 
         setHelia(helia)
-        setFs(fs)
 
         // @ts-ignore
         window.helia = helia
@@ -38,9 +34,9 @@ export function HeliaProvider({ children }: WrapperProps) {
     }
 
     init()
-  }, [setHelia, setFs, helia])
+  }, [setHelia, helia])
 
-  return <heliaContext.Provider value={{ helia, fs }}>{children}</heliaContext.Provider>
+  return <heliaContext.Provider value={{ helia }}>{children}</heliaContext.Provider>
 }
 
 export function useHeliaContext() {
