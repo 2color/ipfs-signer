@@ -1,32 +1,10 @@
 import { UnixFS } from '@helia/unixfs'
 import { dagJson } from '@helia/dag-json'
-import { createHelia, Helia } from 'helia'
-import { trustlessGateway } from 'helia/block-brokers'
 import { CID } from 'multiformats/cid'
 import { car } from '@helia/car'
 import { CarWriter, CarReader } from '@ipld/car'
 import toIt from 'browser-readablestream-to-it'
-
-export async function startHttpHelia() {
-  const helia = await createHelia({
-    blockBrokers: [
-      trustlessGateway({
-        gateways: ['https://dweb.link', 'https://cf-ipfs.com'],
-      }),
-    ],
-    libp2p: {
-      start: false,
-      connectionManager: {
-        minConnections: 0,
-      },
-      services: {},
-      peerDiscovery: [],
-    },
-  })
-  await helia.libp2p.stop()
-
-  return helia
-}
+import { Helia } from '@helia/http'
 
 export async function getUnixFsJson(fs: UnixFS, cid: CID): Promise<any> {
   const decoder = new TextDecoder()

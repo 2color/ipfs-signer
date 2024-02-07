@@ -1,8 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react'
 
-import type { Helia } from 'helia'
-import { startHttpHelia } from '@/utils/ipfs'
-import { UnixFS, unixfs } from '@helia/unixfs'
+import { Helia, createHeliaHTTP } from '@helia/http'
 
 // 👇 The context type will be avilable "anywhere" in the app
 interface HeliaContextInterface {
@@ -22,7 +20,7 @@ export function HeliaProvider({ children }: WrapperProps) {
       if (helia) return
 
       try {
-        const helia = await startHttpHelia()
+        const helia = await createHeliaHTTP()
 
         setHelia(helia)
 
