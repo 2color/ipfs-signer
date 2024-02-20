@@ -1,6 +1,8 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react'
 
 import { Helia, createHeliaHTTP } from '@helia/http'
+import { IDBBlockstore } from 'blockstore-idb'
+import { IDBDatastore } from 'datastore-idb'
 
 // 👇 The context type will be avilable "anywhere" in the app
 interface HeliaContextInterface {
@@ -20,7 +22,15 @@ export function HeliaProvider({ children }: WrapperProps) {
       if (helia) return
 
       try {
-        const helia = await createHeliaHTTP()
+        const blockstore = new IDBBlockstore('helia-blocks')
+        const datastore = new IDBDatastore('helia-data')
+
+        await Promise.all([blockstore.open(), datastore.open()])
+
+        const helia = await createHeliaHTTP({
+          blockstore,
+          datastore,
+        })
 
         setHelia(helia)
 

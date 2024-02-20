@@ -22,11 +22,11 @@ export const SignedMessage = ({ address, signature, message, isMessageVerified, 
 
   return (
     <div className="flex flex-col bg-indigo-200 p-4 rounded-md">
-      <h3 className="max-w-xl  text-xl font-bold self-center ">Signed Message</h3>
+      <h3 className="max-w-xl  text-xl font-bold self-center ">Signed Message 🔐</h3>
       <div className="self-center mb-2">
-        <span className="text-bold">
+        <span className="text-bold break-all">
           {/* {cid.slice(0, 4)}...{cid.slice(-4)} */}
-          (cid: <code>{cid}</code>)
+          (CID: <code>{cid}</code>)
         </span>
       </div>
       <div>

@@ -5,6 +5,7 @@ import { createCarBlob, createCidForSignedMessage, downloadCarFile } from '@/uti
 import { CID } from 'multiformats/cid'
 import React, { MouseEventHandler, useCallback, useEffect, useState } from 'react'
 import { useAccount, useSignMessage } from 'wagmi'
+import Spinner from './spinner'
 
 export default function SignPage() {
   const [signature, setSignature] = useState<`0x${string}` | undefined>()
@@ -14,6 +15,8 @@ export default function SignPage() {
   const { address } = useAccount()
   const { helia } = useHeliaContext()
   const { data, isError, isLoading, isSuccess, signMessageAsync } = useSignMessage()
+  const [loading, setLoading] = useState(false)
+
 
   const handleSign = useCallback(async () => {
     if (!address) {
@@ -21,14 +24,19 @@ export default function SignPage() {
       return
     }
     if (!helia) {
-      setError('UnixFS is not instantiated')
+      setError('Helia is not instantiated')
       return
     }
-
+    if(!message) {
+      setError('Message is required')
+      return
+    }
     setError('')
+
 
     // Handle the signing logic here
     try {
+      setLoading(true)
       const signature = await signMessageAsync({ message })
       setSignature(signature)
       const cid = await createCidForSignedMessage(helia, { message, signature, address })
@@ -69,8 +77,8 @@ export default function SignPage() {
     <div className="mt-10 flex items-center justify-center">
       <div className="p-6 bg-white rounded-md shadow-md md:w-1/2 w-full">
         <h2 className="mb-4 text-xl font-bold text-gray-700">Sign a message with your Ethereum wallet</h2>
-        {error && <p className="p-2 bg-red-400 rounded-sm text-white">Error: {error}</p>}
-        {!hasSigned && <SigningForm handleSign={handleSign} message={message} setMessage={setMessage} />}
+        {error && <p className="p-2 bg-red-400 rounded-sm text-white">{error}</p>}
+        {!hasSigned && <SigningForm loading={loading} handleSign={handleSign} message={message} setMessage={setMessage} />}
         {hasSigned && address && cid && (
           <DownloadCar
             message={message}
@@ -117,11 +125,13 @@ function SigningForm({
   message,
   setMessage,
   address,
+  loading
 }: {
   handleSign: () => Promise<void>
   message: string
   setMessage: React.Dispatch<React.SetStateAction<string>>
   address?: string
+  loading: boolean
 }) {
   return (
     <>
@@ -133,9 +143,10 @@ function SigningForm({
       ></textarea>
       <button
         onClick={() => handleSign()}
+        disabled={loading}
         className="mt-4 px-6 py-2 bg-indigo-500 text-white rounded-md hover:bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:ring-opacity-50"
       >
-        Sign
+        Sign {loading && <Spinner />}
       </button>
     </>
   )
