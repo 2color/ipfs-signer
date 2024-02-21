@@ -87,7 +87,7 @@ export async function createCidForSignedMessage(
   return cid
 }
 
-export async function createCarBlob(helia: Helia, cid: CID) {
+export async function createCarBlob(helia: Helia, cid: CID): Promise<Blob> {
   const { writer, out } = await CarWriter.create(cid)
   car(helia).export(cid, writer)
 

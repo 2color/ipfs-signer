@@ -17,7 +17,6 @@ export default function SignPage() {
   const { data, isError, isLoading, isSuccess, signMessageAsync } = useSignMessage()
   const [loading, setLoading] = useState(false)
 
-
   const handleSign = useCallback(async () => {
     if (!address) {
       setError('Connect wallet first')
@@ -27,12 +26,11 @@ export default function SignPage() {
       setError('Helia is not instantiated')
       return
     }
-    if(!message) {
+    if (!message) {
       setError('Message is required')
       return
     }
     setError('')
-
 
     // Handle the signing logic here
     try {
@@ -60,6 +58,29 @@ export default function SignPage() {
     downloadCarFile(blob)
   }, [helia, cid])
 
+  const handleUploadCar = useCallback(async () => {
+    if (!helia) {
+      setError('UnixFS not initialised')
+      return
+    }
+    if (!cid) {
+      setError('no cid')
+      return
+    }
+    const blob = await createCarBlob(helia, cid)
+    try {
+      const resp = await fetch('http://localhost:8787/signature', {
+        body: blob,
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/vnd.ipfs.car',
+        },
+      })
+    } catch (e) {
+      setError('Failed to upload the CAR')
+    }
+  }, [helia, cid])
+
   const hasSigned = signature && signature.length > 0
 
   if (!address) {
@@ -78,14 +99,17 @@ export default function SignPage() {
       <div className="p-6 bg-white rounded-md shadow-md md:w-1/2 w-full">
         <h2 className="mb-4 text-xl font-bold text-gray-700">Sign a message with your Ethereum wallet</h2>
         {error && <p className="p-2 bg-red-400 rounded-sm text-white">{error}</p>}
-        {!hasSigned && <SigningForm loading={loading} handleSign={handleSign} message={message} setMessage={setMessage} />}
+        {!hasSigned && (
+          <SigningForm loading={loading} handleSign={handleSign} message={message} setMessage={setMessage} />
+        )}
         {hasSigned && address && cid && (
-          <DownloadCar
+          <HandleSigned
             message={message}
             address={address}
             signature={signature}
             cid={cid}
             handleDownloadCar={handleDownloadCar}
+            handleUploadCar={handleUploadCar}
           />
         )}
       </div>
@@ -93,18 +117,20 @@ export default function SignPage() {
   )
 }
 
-function DownloadCar({
+function HandleSigned({
   message,
   signature,
   address,
   cid,
   handleDownloadCar,
+  handleUploadCar,
 }: {
   message: string
   signature: `0x${string}`
   address: `0x${string}`
   cid: CID
   handleDownloadCar: () => Promise<void>
+  handleUploadCar: () => Promise<void>
 }) {
   return (
     <div>
@@ -116,6 +142,12 @@ function DownloadCar({
       >
         Download CAR
       </button>
+      <button
+        onClick={handleUploadCar}
+        className="mt-4 ml-2 px-6 py-2 max-w-sm bg-indigo-500 text-white rounded-md hover:bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:ring-opacity-50"
+      >
+        Upload CAR
+      </button>
     </div>
   )
 }
@@ -125,7 +157,7 @@ function SigningForm({
   message,
   setMessage,
   address,
-  loading
+  loading,
 }: {
   handleSign: () => Promise<void>
   message: string
