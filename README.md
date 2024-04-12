@@ -16,3 +16,13 @@ Identity is much broader than crypto wallets and exploring alternatives would be
 - [Web Authentication API (WebAuthn)](https://developer.mozilla.org/en-US/docs/Web/API/Web_Authentication_API) as a building block for signing arbitrary messages. 
 - [Web Crypto API](https://developer.mozilla.org/en-US/docs/Web/API/Web_Crypto_API) as a lower-level building block for non-extractable keys
 - [Passkeys](https://fidoalliance.org/passkeys/)
+
+
+## Getting started
+
+To get up and running locally:
+
+```sh
+npm install
+npm run dev
+```
